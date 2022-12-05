@@ -1,0 +1,129 @@
+import sys
+
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Cryptocurrency Price Predictor")
+        self.setMinimumSize(800, 600)
+
+        # Create a widget to hold the user interface elements
+        self.widget = QWidget()
+        self.setCentralWidget(self.widget)
+
+        # Create labels and text boxes for the API keys
+        self.coinbase_api_key_label = QLabel("Coinbase API Key:")
+        self.coinbase_api_key_textbox = QLineEdit()
+        self.coinbase_api_secret_label = QLabel("Coinbase API Secret:")
+        self.coinbase_api_secret_textbox = QLineEdit()
+        self.binance_api_key_label = QLabel("Binance API Key:")
+        self.binance_api_key_textbox = QLineEdit()
+        self.binance_api_secret_label = QLabel("Binance API Secret:")
+        self.binance_api_secret_textbox = QLineEdit()
+
+        # Create a button to run the prediction
+        self.run_prediction_button = QPushButton("Run Prediction")
+        self.run_prediction_button.clicked.connect(self.run_prediction)
+
+        # Create a label to display the prediction result
+        self.result_label = QLabel("Prediction result will be displayed here.")
+
+        # Use a layout to arrange the user interface elements
+        layout = QVBoxLayout()
+        layout.addWidget(self.coinbase_api_key_label)
+        layout.addWidget(self.coinbase_api_key_textbox)
+        layout.addWidget(self.coinbase_api_secret_label)
+        layout.addWidget(self.coinbase_api_secret_textbox)
+        layout.addWidget(self.binance_api_key_label)
+        layout.addWidget(self.binance_api_key_textbox)
+        layout.addWidget(self.binance_api_secret_label)
+        layout.addWidget(self.binance_api_secret_textbox)
+        layout.addWidget(self.run_prediction_button)
+        layout.addWidget(self.result_label)
+        self.widget.setLayout(layout)
+
+    def run_prediction(self):
+        # Get the API keys from the text boxes
+        coinbase_api_key = self.coinbase_api_key_textbox.text()
+        coinbase_api_secret = self.coinbase_api_secret_textbox.text()
+        binance_api_key = self.binance_api_key_textbox.text()
+        binance_api_secret = self.binance_api_secret_textbox.text()
+
+        # Use the API keys to access the Coinbase and Binance.US APIs
+        # and retrieve the necessary data
+        client = Client(api_key=coinbase_api_key, api_secret=coinbase_api_secret)
+        data = client.get_historic_prices("LINK-USD")
+        high_low_data = client.get_product_24hr_stats("LINK-USD")
+        high_price = high_low_data["high"]
+        low_price = high_low_data["low"]
+
+        binance_client = Client(api_key=binance_api_key, api_secret=binance_api_secret)
+        binance_data = binance_client.get_symbol_ticker(symbol="LINKUSDT")["volume"]
+
+        # Collect and process news and sentiment data for Chainlink
+        news_data = <code to collect and process news and sentiment data>
+
+        # Convert the data to a Pandas DataFrame
+        data = pd.DataFrame(data)
+
+        # Add the daily high and low prices to the data
+        data["high"] = high_price
+        data["low"] = low_price
+
+        # Add the trading volume from Binance.US to the data
+        data["binance_volume"] = binance_data
+
+        # Add the news and sentiment data to the data
+        data["news_sentiment"] = news_data
+
+        # Clean and preprocess the data
+        data = data.dropna()
+        data["time"] = pd.to_datetime(data["time"])
+        data["price"] = data["price"].astype(float)
+        data["volume"] = data["volume"].astype(float)
+        data["market_cap"] = data["market_cap"].astype(float)
+        data["high"] = data["high"].astype(float)
+        data["low"] = data["low"].astype(float)
+        data["binance_volume"] = data["binance_volume"].astype(float)
+        data["news_sentiment"] = data["news_sentiment"].astype(float)
+
+        # Normalize the data
+        data["price"] = (data["price"] - data["price"].mean()) / data["price"].std()
+        data["volume"] = (data["volume"] - data["volume"].mean()) / data[""volume"].std()
+        data["market_cap"] = (data["market_cap"] - data["market_cap"].mean()) / data["market_cap"].std()
+        data["high"] = (data["high"] - data["high"].mean()) / data["high"].std()
+        data["low"] = (data["low"] - data["low"].mean()) / data["low"].std()
+        data["binance_volume"] = (data["binance_volume"] - data["binance_volume"].mean()) / data["binance_volume"].std()
+        data["news_sentiment"] = (data["news_sentiment"] - data["news_sentiment"].mean()) / data["news_sentiment"].std()
+        
+            # Split the data into training and testing sets
+    X_train = data[["time", "volume", "market_cap", "high", "low", "binance_volume", "news_sentiment"]][:int(len(data) * 0.8)]
+    y_train = data[["price"]][:int(len(data) * 0.8)]
+    X_test = data[["time", "volume", "market_cap", "high", "low", "binance_volume", "news_sentiment"]][int(len(data) * 0.8):]
+    y_test = data[["price"]][int(len(data) * 0.8):]
+
+    # Create a linear regression model
+    lin_reg = LinearRegression()
+
+    # Use grid search to find the best hyperparameters
+    parameters = {"fit_intercept": [True, False], "normalize": [True, False]}
+    grid_search = GridSearchCV(lin_reg, parameters, cv=5)
+    grid_search.fit(X_train, y_train)
+    lin_reg = grid_search.best_estimator_
+
+    # Use cross-validation to evaluate the model
+    scores = cross_val_score(lin_reg, X_train, y_train, cv=5)
+    print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+
+    # Use the trained model to make a prediction
+    prediction = lin_reg.predict(X_test)
+
+    # Display the prediction result in the GUI
+    self.result_label.setText(f"Prediction result: {prediction}")
+
+
+
