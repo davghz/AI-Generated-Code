@@ -1,13 +1,3 @@
-First develop, real-world risk allocation for Chainlink, the AI would first gather and analyze data on the market trends and performance of Chainlink and other relevant assets. This could include data on the price movements, volume, market capitalization, and other factors that affect the risk of investing in Chainlink.
-
-The AI would then use machine learning algorithms to build and train predictive models on this data. These models could be used to forecast the future prices of Chainlink and other assets, and to determine their potential risks and rewards.
-
-Based on the predictions of the models, the AI could then recommend a risk allocation strategy for investing in Chainlink and other assets. This could include diversifying the portfolio across different assets, balancing high-risk and low-risk investments, and adjusting the allocation based on changing market conditions. The AI could also provide ongoing monitoring and analysis of the portfolio to ensure that it remains aligned with the desired risk allocation.
-
-Put in codr box
-Don’t include the S&P500
-Using the ai and Python
-
 # Import necessary libraries
 import pandas as pd
 from sklearn.linear_model import LinearRegression
@@ -83,3 +73,34 @@ print(f"The recommended allocation to Chainlink is {allocation * 100}%")
 while True:
     # Get the latest market
     data for Chainlink
+    from Coinbase
+new_data = client.get_historic_prices("LINK-USD")
+
+# Convert the data to a Pandas DataFrame
+new_data = pd.DataFrame(new_data)
+
+# Clean and preprocess the data
+new_data = new_data.dropna()
+new_data["time"] = pd.to_datetime(new_data["time"])
+
+# Use the chosen model to make predictions about future prices
+new_future_prices = model.predict(new_data)
+
+# Compare the predicted prices with the previous predictions
+if new_future_prices[-1] > future_prices[-1]:
+    # If the predicted price is expected to increase, recommend a higher allocation to Chainlink
+    allocation = 0.8
+else:
+    # If the predicted price is expected to decrease, recommend a lower allocation to Chainlink
+    allocation = 0.2
+
+# Output the updated allocation
+print(f"The updated allocation to Chainlink is {allocation * 100}%")
+
+# Set the new future prices as the previous prices for the next iteration
+future_prices = new_future_prices
+
+# Wait for a specified time interval before checking the market again
+time.sleep(60)"
+
+
