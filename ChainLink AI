@@ -1,0 +1,37 @@
+pragma solidity ^0.8.0;
+
+import "@chainlink/contracts/src/v0.8/PriceReference.sol";
+
+contract MyContract {
+  PriceReference priceReference;
+
+  constructor(address _priceReferenceAddress) public {
+    priceReference = PriceReference(_priceReferenceAddress);
+  }
+
+  function getChainlinkData() public view returns (
+    uint price,
+    uint rsi,
+    uint macd,
+    uint vol,
+    uint bollLower,
+    uint bollUpper
+  ) {
+    // Get the latest price of Chainlink in USD.
+    price = priceReference.getLatestAnswer("CHAINLINK/USD").value;
+
+    // Get the latest RSI for Chainlink.
+    rsi = priceReference.getLatestAnswer("CHAINLINK/USD/RSI").value;
+
+    // Get the latest MACD for Chainlink.
+    macd = priceReference.getLatestAnswer("CHAINLINK/USD/MACD").value;
+
+    // Get the latest volume for Chainlink.
+    vol = priceReference.getLatestAnswer("CHAINLINK/USD/VOL").value;
+
+    // Get the latest Bollinger band values for Chainlink.
+    var bollData = priceReference.getLatestAnswer("CHAINLINK/USD/BOLL").value;
+    bollLower = bollData.lower;
+    bollUpper = bollData.upper;
+  }
+}
