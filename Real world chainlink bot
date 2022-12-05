@@ -1,5 +1,6 @@
 
-add a set of trading rules or algorithms that it uses to determine when to buy or sell assets, such as using technical indicators like those calculated in the script you provided; it should have a way to execute trades
+First, develope and add a set of trading rules or algorithms that it uses to determine when to buy or sell ChainLink, such as using technical indicators like those calculated in the script you provided.
+Second, it should have a way to execute trades
 
 # Import necessary libraries
 import pandas as pd
