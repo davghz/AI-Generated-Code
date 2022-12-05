@@ -1,0 +1,22 @@
+# Import the necessary libraries
+import requests
+import json
+
+# Set the API key and the endpoint URL
+api_key = 'YOUR_API_KEY'
+endpoint = 'https://api.coinbase.com/v2/prices/LINK-USD/spot'
+
+# Set the headers for the API request
+headers = {
+  'CB-VERSION': '2018-01-10',
+  'CB-ACCESS-KEY': api_key
+}
+
+# Send the API request and get the response
+response = requests.get(endpoint, headers=headers)
+
+# Parse the response as JSON
+data = json.loads(response.text)
+
+# Extract the price from the response
+price = data['data']['amount']
