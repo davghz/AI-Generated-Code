@@ -194,3 +194,7 @@ print(f"The updated recommended allocation to Chainlink is {allocation * 100}%")
 
 Sleep for one day before making the next prediction
 time.sleep(86400)
+
+To implement these changes, you could start by modifying the code to use k-fold cross-validation instead of the simple holdout method. This would involve using the KFold class from the sklearn.model_selection module to split the data into k folds, and then iterating over the folds to train and evaluate the model.
+
+Next, you could implement nested cross-validation to choose the best model and the best hyperparameters simultaneously. This would involve using the GridSearchCV class from the sklearn.model_selection module to perform grid search, and then using the cross_val_score function to evaluate the performance of the model.
