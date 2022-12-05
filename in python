@@ -1,6 +1,8 @@
 # Import the necessary libraries
 import requests
 import json
+import pandas as pd
+import numpy as np
 
 # Set the API key and the endpoint URL
 api_key = 'YOUR_API_KEY'
@@ -18,5 +20,44 @@ response = requests.get(endpoint, headers=headers)
 # Parse the response as JSON
 data = json.loads(response.text)
 
-# Extract the price from the response
+# Extract the price and timestamp from the response
 price = data['data']['amount']
+timestamp = data['data']['time']
+
+# Create a DataFrame containing the price and timestamp
+df = pd.DataFrame({'close': [price], 'timestamp': [timestamp]})
+
+# Load the market data for Chainlink
+market_data = pd.read_csv('chainlink_data.csv')
+
+# Combine the market data and the price data
+df = pd.concat([market_data, df], ignore_index=True)
+
+# Calculate the MACD
+# First, calculate the moving average for the past 26 days
+df['26_day_ma'] = df['close'].rolling(26).mean()
+
+# Calculate the moving average for the past 12 days
+df['12_day_ma'] = df['close'].rolling(12).mean()
+
+# Calculate the MACD by subtracting the 26-day moving average from the 12-day moving average
+df['macd'] = df['12_day_ma'] - df['26_day_ma']
+
+# Calculate the RSI
+# First, calculate the average gain and the average loss for the past 14 days
+df['avg_gain'] = df['close'].diff(1).mask(lambda x: x < 0, 0).rolling(14).mean()
+df['avg_loss'] = abs(df['close'].diff(1)).mask(lambda x: x < 0, 0).rolling(14).mean()
+
+# Calculate the RSI by dividing the average gain by the average loss
+df['rsi'] = df['avg_gain'] / df['avg_loss']
+
+# Calculate the Bollinger Bands
+# First, calculate the moving average for the past 20 days
+df['20_day_ma'] = df['close'].rolling(20).mean()
+
+# Calculate the standard deviation for the past 20 days
+df['20_day_std'] = df['close'].rolling(20).std()
+
+# Calculate the upper and lower Bollinger Bands
+df['upper_bollinger'] = df['20_day_ma'] + (df['20_day_std'] * 2)
+df['lower_bollinger'] = df['20_day_ma'] - (df['
