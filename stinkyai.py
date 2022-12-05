@@ -4,6 +4,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
+import coinbase
+from coinbase.wallet.client import Client
 
 # Set up the Coinbase API client
 client = Client(api_key="your_api_key", api_secret="your_api_secret")
@@ -71,36 +73,36 @@ print(f"The recommended allocation to Chainlink is {allocation * 100}%")
 
 # Monitor the portfolio and adjust the allocation as needed
 while True:
-    # Get the latest market
-    data for Chainlink
-    from Coinbase
-new_data = client.get_historic_prices("LINK-USD")
+    # Get the latest market data for Chainlink from Coinbase
+    new_data = client.get_historic_prices("LINK-USD")
 
-# Convert the data to a Pandas DataFrame
-new_data = pd.DataFrame(new_data)
+    # Convert the data to a Pandas DataFrame
+    new_data = pd.DataFrame(new_data)
 
-# Clean and preprocess the data
-new_data = new_data.dropna()
-new_data["time"] = pd.to_datetime(new_data["time"])
+    # Clean and preprocess the data
+    new_data = new_data.dropna()
+    new_data["time"] = pd.to_datetime(new_data["time"])
 
-# Use the chosen model to make predictions about future prices
-new_future_prices = model.predict(new_data)
+    # Use the chosen model to make predictions about future prices
+    new_future_prices = model.predict(new_data)
 
-# Compare the predicted prices with the previous predictions
-if new_future_prices[-1] > future_prices[-1]:
-    # If the predicted price is expected to increase, recommend a higher allocation to Chainlink
-    allocation = 0.8
-else:
-    # If the predicted price is expected to decrease, recommend a lower allocation to Chainlink
-    allocation = 0.2
+    # Compare the predicted prices with the previous predictions
+    if new_future_prices[-1] > future_prices[-1]:
+        # If the predicted price is expected to increase, recommend a higher allocation to Chainlink
+        allocation = 0.8
+    else:
+        # If the predicted price is expected to decrease, recommend a lower allocation to Chainlink
+        allocation = 0.2
 
-# Output the updated allocation
-print(f"The updated allocation to Chainlink is {allocation * 100}%")
+    # Output the updated allocation
+    print(f"The updated allocation to Chainlink is {allocation * 100}%")
 
-# Set the new future prices as the previous prices for the next iteration
-future_prices = new_future_prices
+    # Update the previous predictions with the new predictions
+    future_prices = new_future_prices
 
-# Wait for a specified time interval before checking the market again
-time.sleep(60)"
+    # Check if the user wants to stop the loop
+    user_input = input("Enter 'stop' to terminate the loop: ")
+    if user_input == "stop":
+        break
 
 
