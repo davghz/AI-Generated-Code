@@ -1,0 +1,196 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV, cross_val_score
+
+import coinbase
+from coinbase.wallet.client import Client
+
+# Set your API key and secret
+client = Client(api_key="", api_secret="")
+
+# Get the market data for Chainlink from Coinbase
+data = client.get_historic_prices("LINK-USD")
+
+# Import the Binance.US API client
+from binance.client import Client
+
+# Set your API key and secret
+client = Client(api_key="", api_secret="")
+
+# Get the trading volume for Chainlink
+chainlink_volume = client.get_symbol_ticker(symbol="LINKUSDT")["volume"]
+
+# Get the daily high and low prices for Chainlink from Coinbase
+high_low_data = client.get_product_24hr_stats("LINK-USD")
+high_price = high_low_data["high"]
+low_price = high_low_data["low"]
+
+# Get the trading volume for Chainlink on Binance.US
+binance_data = <code to access Binance.US API and get trading volume>
+
+# Collect and process news and sentiment data for Chainlink
+news_data = <code to collect and process news and sentiment data>
+
+# Convert the data to a Pandas DataFrame
+data = pd.DataFrame(data)
+
+# Add the daily high and low prices to the data
+data["high"] = high_price
+data["low"] = low_price
+
+# Add the trading volume from Binance.US to the data
+data["binance_volume"] = binance_data
+
+# Add the news and sentiment data to the data
+data["news_sentiment"] = news_data
+
+# Clean and preprocess the data
+data = data.dropna()
+data["time"] = pd.to_datetime(data["time"])
+data["price"] = data["price"].astype(float)
+data["volume"] = data["volume"].astype(float)
+data["market_cap"] = data["market_cap"].astype(float)
+data["high"] = data["high"].astype(float)
+data["low"] = data["low"].astype(float)
+data["binance_volume"] = data["binance_volume"].astype(float)
+data["news_sentiment"] = data["news_sentiment"].astype(float)
+
+# Normalize the data
+data["price"] = (data["price"] - data["price"].mean()) / data["price"].std()
+data["volume"] = (data["volume"] - data["volume"].mean()) / data["volume"].std()
+data["market_cap"] = (data["market_cap"] - data["market_cap"].mean()) / data["market_cap"].std()
+data["high"] = (data["high"] - data["high"].mean()) / data["high"].std()
+data["low"] = (data["low"] - data["low"].mean()) / data["low"].std()
+data["binance_volume"] = (data["binance_volume"] - data["binance_volume"].mean()) / data["binance_volume"].std()
+data["news_sentiment"] = (data["news_sentiment"] - data["newsiment"].mean()) / data["news_sentiment"].std()
+
+# Split the data into training and testing sets
+X_train = data[["time", "volume", "market_cap", "high", "low", "binance_volume", "news_sentiment"]][:int(len(data) * 0.8)]
+y_train = data[["price"]][:int(len(data) * 0.8)]
+X_test = data[["time", "volume", "market_cap", "high", "low", "binance_volume", "news_sentiment"]][int(len(data) * 0.8):]
+y_test = data[["price"]][int(len(data) * 0.8):]
+
+# Create a linear regression model
+lin_reg = LinearRegression()
+
+# Use grid search to find the best hyperparameters for the model
+param_grid = {"fit_intercept": [True, False], "normalize": [True, False]}
+grid_search = GridSearchCV(lin_reg, param_grid, cv=5)
+
+# Train the model on the training data
+grid_search.fit(X_train, y_train)
+
+# Create a support vector regression model
+svr = SVR()
+
+# Train the model on the training data
+svr.fit(X_train, y_train)
+
+# Create a random forest regression model
+rf_reg = RandomForestRegressor()
+
+# Use grid search to find the best hyperparameters for the model
+param_grid = {"n_estimators": [10, 100, 1000], "max_depth": [2, 5, 10]}
+grid_search = GridSearchCV(rf_reg, param_grid, cv=5)
+
+# Train the model on the training data
+grid_search.fit(X_train, y_train)
+
+# Use cross-validation to select the best model
+models = [lin_reg, svr, rf_reg]
+scores = [cross_val_score(model, X_train, y_train, cv=5) for model in models]
+best_model = models[np.argmax(scores)]
+
+# Use the chosen model to make predictions about future prices
+future_prices = best_model.predict(X_test)
+
+# Output the predicted prices
+print(future_prices)
+
+# Use the predicted prices to recommend a risk allocation strategy
+if future_prices[-1] > future_prices[0]:
+# If the predicted price is expected to increase, recommend a higher allocation to Chainlink
+allocation = 0.8
+else: 
+# Use the chosen model to make predictions about future prices
+future_prices = best_model.predict(X_test)
+
+# Output the predicted prices
+print(future_prices)
+
+# Use the predicted prices to recommend a risk allocation strategy
+if future_prices[-1] > future_prices[0]:
+# If the predicted price is expected to increase, recommend a higher allocation to Chainlink
+allocation = 0.8
+else:
+# If the predicted price is expected to decrease, recommend a lower allocation to Chainlink
+allocation = 0.2
+Output the recommended allocation
+print(f"The recommended allocation to Chainlink is {allocation * 100}%")
+
+# Monitor the portfolio and adjust the allocation as needed
+while True:
+# Get the latest market data for Chainlink from Coinbase
+new_data = client.get_historic_prices("LINK-USD")
+
+# Get the latest daily high and low prices for Chainlink from Coinbase
+high_low_data = client.get_product_24hr_stats("LINK-USD")
+high_price = high_low_data["high"]
+low_price = high_low_data["low"]
+
+# Get the latest trading volume for Chainlink on Binance.US
+binance_data = <code to access Binance.US API and get trading volume>
+
+# Collect and process the latest news and sentiment data for Chainlink
+news_data = <code to collect and process news and sentiment data>
+
+# Convert the data to a Pandas DataFrame
+new_data = pd.DataFrame(new_data)
+
+# Add the latest daily high and low prices to the data
+new_data["high"] = high_price
+new_data["low"] = low_price
+
+# Add the latest trading volume from Binance.US to the data
+new_data["binance_volume"] = binance_data
+
+# Add the latest news and sentiment data to the data
+new_data["news_sentiment"] = news_data
+
+# Clean and preprocess the data
+new_data = new_data.dropna()
+new_data["time"] = pd.to_datetime(new_data["time"])
+new_data["price"] = new_data["price"].astype(float)
+new_data["volume"] = new_data["volume"].astype(float)
+new_data["market_cap"] = new_data["market_cap"].astype(float)
+new_data["high"] = new_data["high"].astype(float)
+new_data["low"] = new_data["low"].astype(float)
+new_data["binance_volume"] = new_data["binance_volume"].astype(float)
+new_data["news_sentiment"] = new_data["news_sentiment"].astype(float)
+
+# Normalize the data
+new_data["price"] = (new_data["price"] - new_data["price"].mean()) / new_data["price"].std()
+new_data["volume"] = (new_data["volume"] - new_data["volume"].mean()) / new_data["volume"].std()
+new_data["market_cap"] = (new_data["market_cap"] - new_data["market_cap"].mean()) / new_data["market_cap"].std()
+new_data["high"] = (new_data["high"] - new_data["high"].mean()) / new_data["high"].std()
+new_data["low"] = (new_data["low"] - new_data["low"].mean()) / new_data["low"].std()
+new_data["binance_volume"] = (new_data["binance_volume"] - new_data["binance_volume"].mean()) / new_data["binance_volume"].std()
+new_data["news_sentiment"] = (new_data["news_sentiment"] - new_data["news_sentiment"].mean()) / new_data["news_sentiment"].std()
+Use the chosen model to make predictions about future prices
+new_future_prices = best_model.predict(new_data)
+
+# Compare the predicted prices with the previous predictions
+if new_future_prices[-1] > future_prices[-1]:
+# If the predicted price is expected to increase, recommend a higher allocation to Chainlink
+allocation = 0.8
+else:
+# If the predicted price is expected to decrease, recommend a lower allocation to Chainlink
+allocation = 0.2
+
+Output the updated recommended allocation
+print(f"The updated recommended allocation to Chainlink is {allocation * 100}%")
+
+Sleep for one day before making the next prediction
+time.sleep(86400)
