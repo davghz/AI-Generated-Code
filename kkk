@@ -1,0 +1,241 @@
+# Import the necessary modules
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import SVR
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV, cross_val_score
+
+import coinbase
+from coinbase.wallet.client import Client
+
+# Set your API key and secret
+client = Client(api_key="", api_secret="")
+
+# Get the market data for Chainlink from Coinbase
+data = client.get_historic_prices("LINK-USD")
+
+# Import the Binance.US API client
+from binance import Client
+
+# Set your API key and secret
+binance_client = Client(api_key="", api_secret="")
+
+# Get the trading volume for Chainlink
+chainlink_volume = binance_client.symbol_volume(symbol="LINKUSDT")
+
+# Get the daily high and low prices for Chainlink from Binance.US
+high_low_data = binance_client.get_market_ticker(symbol="LINKUSDT")
+high_price = high_low_data["high"]
+low_price = high_low_data["low"]
+
+# Get the trading volume for Chainlink on Binance.US
+binance_data = binance_client.get_market_ticker(symbol="LINKUSDT")["volume"]
+
+# Collect and process news and sentiment data for Chainlink
+twitter_client = TwitterAPI(api_key="", api_secret_key="", access_token="", access_token_secret="")
+news_data = twitter_client.get_tweets("chainlink")
+
+# Convert the data to a Pandas DataFrame
+data = pd.DataFrame(data)
+
+# Add the daily high and low prices to the data
+data["high"] = high_price
+data["low"] = low_price
+
+# Add the trading volume from Binance.US to the data
+data["binance_volume"] = binance_data
+
+# Add the news and sentiment data to the data
+data["news_sentiment"] = news_data
+
+# Clean and preprocess the data
+data = data.dropna()
+data["time"] = pd.to_datetime(data["time"])
+data["price"] = data["price"].astype(float)
+data["volume"] = data["volume"].astype(float)
+data["market_cap"] = data["market_cap"].astype(float)
+data["high"] = data["high"].astype(float)
+data["low"] = data["low"].astype(float)
+data["binance_volume"] = data["binance_volume"].astype(float)
+data["news_sentiment"] = data["news_sentiment"].astype(float)
+
+# Normalize the data
+data["price"] = (data["price"] - data["price"].mean()) / data["price"].std()
+data["volume"] = (data["volume"] - data["volume"].mean()) / data["volume"].std()
+data["market_cap"] = (data["market_cap"] - data["market_cap"].mean()) / data["market_cap"].std()
+data["high"] = (data["high"] - data["high"].mean()) / data["high"].std()
+data["low"] = (data["low"] - data["low"].mean()) / data["low"].std()
+data["binance_volume"] = (data["binance_volume"] - data["binance_volume"].mean()) / data["binance_volume"].std()
+data["news_sentiment"] = (data["news_sentiment"] - data["news_sentiment"].mean()) / data["news_sentiment"].std()
+
+# Split the data into training and testing sets
+X_train = data[["time", "volume", "market_cap", "high", "low", "binance_volume", "news_sentiment"]][:int(len(data) * 0.8)]
+y_train = data[["price"]][:int(len(data) * 0.8)]
+X_test = data[["time", "volume", "market_cap", "high", "low", "binance_volume", "news_sentiment"]][int(len(data) * 0.8):]
+y_test = data[["price"]][int(len(data) * 0.8):]
+
+# Create a linear regression model
+lin_reg = LinearRegression()
+
+# Use grid search to find the best hyperparameters for the model
+param_grid = {"normalize": [True, False]}
+grid_search = GridSearchCV(lin_reg, param_grid, cv=5)
+grid_search.fit(X_train, y_train)
+best_params = grid_search.best_params_
+
+# Use the best hyperparameters to train the model
+lin_reg = LinearRegression(normalize=best_params["normalize"])
+lin_reg.fit(X_train, y_train)
+
+# Use cross-validation to evaluate the linear regression model
+lin_scores = cross_val_score(lin_reg, X_train, y_train, cv=5)
+lin_reg_score = lin_scores.mean()
+
+# Print the results
+print("Linear Regression R^2:", lin_reg_score)
+
+# Print the results
+print("Linear Regression R^2:", lin_reg_score)
+
+# Create a support vector machine regression model
+svm_reg = SVR()
+
+# Use grid search to find the best hyperparameters for the model
+param_grid = {"kernel": ["linear", "poly", "rbf", "sigmoid"], "C": [0.1, 1, 10, 100]}
+grid_search = GridSearchCV(svm_reg, param_grid, cv=5)
+grid_search.fit(X_train, y_train)
+best_params = grid_search.best_params_
+
+# Use the best hyperparameters to train the model
+svm_reg = SVR(kernel=best_params["kernel"], C=best_params["C"])
+svm_reg.fit(X_train, y_train)
+
+# Use cross-validation to evaluate the support vector machine regression model
+svm_scores = cross_val_score(svm_reg, X_train, y_train, cv=5)
+svm_reg_score = svm_scores.mean()
+
+# Print the results
+print("Support Vector Machine Regression R^2:", svm_reg_score)
+
+# Print the results
+print("Support Vector Machine Regression R^2:", svm_reg_score)
+
+# Create a random forest regression model
+forest_reg = RandomForestRegressor()
+
+# Use grid search to find the best hyperparameters for the model
+param_grid = {"n_estimators": [100, 200, 300], "max_depth": [3, 5, 7]}
+grid_search = GridSearchCV(forest_reg, param_grid, cv=5)
+grid_search.fit(X_train, y_train)
+best_params = grid_search.best_params_
+
+# Use the best hyperparameters to train the model
+forest_reg = RandomForestRegressor(n_estimators=best_params["n_estimators"], max_depth=best_params["max_depth"])
+forest_reg.fit(X_train, y_train)
+
+# Use cross-validation to evaluate the random forest regression model
+forest_scores = cross_val_score(forest_reg, X_train, y_train, cv=5)
+forest_reg_score = forest_scores.mean()
+
+# Print the results
+print("Random Forest Regression R^2:", forest_reg_score)
+
+# Print the results
+print("Random Forest Regression R^2:", forest_reg_score)
+
+# Select the best model based on the cross-validation scores
+if lin_reg_score > svm_reg_score and lin_reg_score > forest_reg_score:
+    best_model = lin_reg
+    best_score = lin_reg_score
+elif svm_reg_score > lin_reg_score and svm_reg_score > forest_reg_score:
+    best_model = svm_reg
+    best_score = svm_reg_score
+else:
+    best_model = forest_reg
+    best_score = forest_reg_score
+
+# Print the results
+print("Best Model:", best_model)
+print("Best R^2 Score:", best_score)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the root mean squared error of the predictions
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+# Print the results
+print("Root Mean Squared Error:", rmse)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the mean absolute error of the predictions
+mae = mean_absolute_error(y_test, y_pred)
+
+# Print the results
+print("Mean Absolute Error:", mae)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+
+# Calculate the coefficient of determination of the predictions
+r2 = r2_score(y_test, y_pred)
+
+# Print the results
+print("Coefficient of Determination (R^2):", r2)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the mean squared error of the predictions
+mse = mean_squared_error(y_test, y_pred)
+
+# Print the results
+print("Mean Squared Error:", mse)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the median absolute error of the predictions
+medae = median_absolute_error(y_test, y_pred)
+
+# Print the results
+print("Median Absolute Error:", medae)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the explained variance of the predictions
+ev = explained_variance_score(y_test, y_pred)
+
+# Print the results
+print("Explained Variance:", ev)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the maximum error of the predictions
+me = max_error(y_test, y_pred)
+
+# Print the results
+print("Maximum Error:", me)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the mean absolute percentage error of the predictions
+mape = mean_absolute_percentage_error(y_test, y_pred)
+
+# Print the results
+print("Median Absolute Percentage Error:", medape)
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the R^2 score of the predictions
+r2_pred = r2_score(y_test, y_pred)
+
+# Print the results
+print("R^2 Score:", r2_pred)
